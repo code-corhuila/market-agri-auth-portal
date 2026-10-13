@@ -22,5 +22,7 @@ describe('auth portal', () => {
     expect(
       screen.getByRole('heading', { level: 1, name: 'Página no encontrada' }),
     ).toBeInTheDocument();
+    // Its one way out: back to the home of the platform.
+    expect(screen.getByRole('link', { name: 'Volver al inicio' })).toHaveAttribute('href', '/');
   });
 });
