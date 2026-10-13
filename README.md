@@ -13,12 +13,13 @@ using it (today only `shell/ui`). Styles only through `var(--…)` (`12-ux-ui/de
 src/App.tsx            routes of the portal (./App) with its own 404; src/auth/pages, model, api, components
 src/shell.d.ts         types of what the container exposes · config/federation.ts: remote name, ./App, singletons
 test/                  unit (rules, federation), component (doubles of shell/*), docker (image)
-deploy/                Dockerfile (npm ci) and nginx.conf (remoteEntry never cached)
+deploy/                Dockerfile (npm ci, ARG VITE_SHELL_URL required), nginx.conf (remoteEntry never cached),
+                       compose.yml (included by market-agri-infra; served by the gateway at /portals/auth/)
 ```
 
 ```bash
 npm ci && npm run test:unit && npm run test:component && npm run build
-npm run dev                  # serves remoteEntry.js on :5174; open it inside the container:
+npm run dev                  # serves :5174/portals/auth/remoteEntry.js; open it inside the container:
                              # http://localhost:5173/login (alone, :5174 is a blank page by design)
 bash test/docker/image.sh    # the image builds and never carries node_modules, dist or .env
 ```
