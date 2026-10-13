@@ -1,25 +1,25 @@
 # market-agri-auth-portal
 
-> auth bounded context: web UI (remote)
+Portal of the **auth** domain of the **Marketplace Agrícola Huila** web interface: React 19,
+TypeScript (strict) and Vite, a Module Federation **remote** of `market-agri-front` (Annex H,
+ADR-021). Sign-in screen; it replaces the development sign-in (Annex H, rule 5). Sub-tasks: HU-PLAT-008 (structure), HU-AUTH-002 (login).
 
-Part of the **LMS Library** distributed system — team `lms-library`, Grupo 2.
-Governance and documentation live in [`library-docs`](https://github.com/code-corhuila/library-docs).
-
-## Branching
-
-Three permanent branches. **None of them accepts a direct commit** — you enter through a child
-branch and leave through a Pull Request.
+The container mounts `./App` under `/login/*`. The portal takes `shell/apiClient`,
+`shell/session`, `shell/useSession`, `shell/RequireAuth` and `shell/ui` from it and never builds
+its own HTTP client, session or styles (only `var(--…)`, `12-ux-ui/design-system.md`).
 
 ```
-develop  <--PR--  feat/... fix/... chore/...
-qa       <--PR--  qa/...
-main     <--PR--  release/...  hotfix/...
+src/App.tsx            routes of the portal (./App) with its own 404; src/auth/pages, model, api, components
+src/shell.d.ts         types of what the container exposes · config/federation.ts: remote name, ./App, singletons
+test/                  unit (rules, federation), component (doubles of shell/*), docker (image)
+deploy/                Dockerfile (npm ci) and nginx.conf (remoteEntry never cached)
 ```
 
-Promotion happens **by re-application** (`git cherry-pick -x`), never by merging one permanent
-branch into another: `merge develop -> qa` and `merge qa -> main` do not exist in this model.
+```bash
+npm ci && npm run test:unit && npm run test:component && npm run build
+npm run dev                  # :5174, opened inside the container: http://localhost:5173/login
+bash test/docker/image.sh    # the image builds and never carries node_modules, dist or .env
+```
 
-`main` requires **1 approval from `ariel5253`**. On `develop` and `qa` the team sets its own review
-rule.
-
-Full policy: `00-governance/branching-policy.md` in `library-docs`.
+Branches: `develop` ← `feat/…`, `fix/…`, `chore/…`; `qa` ← `qa-<SUBTASK-ID>` (ADR-027); `main` ←
+release and `hotfix/…`. Rules: `market-agri-docs/00-governance/git-conventions.md`.
