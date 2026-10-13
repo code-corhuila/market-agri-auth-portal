@@ -7,7 +7,13 @@ ADR-021). Sign-in screen; it replaces the development sign-in (Annex H, rule 5).
 The container mounts `./App` under `/login/*`. Its HTTP client, session and design system
 (`shell/apiClient`, `shell/session`, `shell/useSession`, `shell/RequireAuth`, `shell/ui`) are the
 only ones the portal uses, never its own; `src/shell.d.ts` declares each one when a page starts
-using it (today only `shell/ui`). Styles only through `var(--…)` (`12-ux-ui/design-system.md`).
+using it (today `shell/apiClient`, `shell/session`,
+`shell/useSession` and `shell/ui`). Styles only through `var(--…)` (`12-ux-ui/design-system.md`).
+
+**Login (HU-AUTH-002):** E-02 through `shell/apiClient`; the session is the container's
+(`shell/session` keeps it without the `refreshToken`), then back to `?next=` (only a route of the
+application). In simulated mode (`VITE_API_MOCKS` with `auth`) the seed users are in the
+container's README.
 
 ```
 src/App.tsx            routes of the portal (./App) with its own 404; src/auth/pages, model, api, components
