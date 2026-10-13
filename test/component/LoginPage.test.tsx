@@ -140,6 +140,33 @@ describe('login page (HU-AUTH-002)', () => {
     expect(password()).toHaveAttribute('aria-invalid', 'true');
   });
 
+  // Review of #4, point 2: a detail of a field the form does not have is not lost.
+  it('a 400 detail of a field the form does not have goes to the alert', async () => {
+    vi.spyOn(apiClient, 'post').mockRejectedValue(
+      apiError(400, 'VALIDATION_ERROR', 'La solicitud tiene datos inválidos.', [
+        { field: 'body', message: 'El cuerpo no es JSON.' },
+      ]),
+    );
+    renderLogin();
+    fill('productor@market-agri.test', 'x');
+    fireEvent.click(submit());
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'La solicitud tiene datos inválidos. El cuerpo no es JSON.',
+    );
+  });
+
+  // Review of #4, point 1: network and timeout arrive as ApiError (status 0) with the container's
+  // message (case above); anything else is a defect, shown generically, never its technical text.
+  it('a failure that is not an error of the API shows the generic message only', async () => {
+    vi.spyOn(apiClient, 'post').mockRejectedValue(new TypeError('x.user is undefined'));
+    renderLogin();
+    fill('productor@market-agri.test', 'Productor123');
+    fireEvent.click(submit());
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Ocurrió un error inesperado.');
+    expect(alert).not.toHaveTextContent('undefined');
+  });
+
   it('disables the button while the request is pending: one click, one request', async () => {
     let resolve: (value: unknown) => void = () => {};
     const post = vi

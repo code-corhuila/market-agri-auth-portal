@@ -19,12 +19,19 @@ function isApiError(error: unknown): error is ApiError {
   );
 }
 
-/** What the form shows for a failed login: the contract's message and each field's detail. */
+/**
+ * What the form shows for a failed login: the contract's message, each detail next to its field,
+ * and the details of fields the form does not have after the message, so none is lost.
+ * Network and timeout failures are ApiError too (status 0, message of the container's client);
+ * anything else is a defect, shown with the generic message of api-contract §2.1, never its text.
+ */
 export function loginFailure(error: unknown): { message: string; fields: CredentialErrors } {
   if (!isApiError(error)) return { message: 'Ocurrió un error inesperado.', fields: {} };
   const fields: CredentialErrors = {};
+  const others: string[] = [];
   for (const { field, message } of error.details) {
     if (field === 'email' || field === 'password') fields[field] = message;
+    else others.push(message);
   }
-  return { message: error.message, fields };
+  return { message: [error.message, ...others].join(' '), fields };
 }
